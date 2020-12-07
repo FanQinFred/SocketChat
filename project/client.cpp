@@ -1,6 +1,3 @@
- // client.cpp
-// create by ReJ
-// date: 2018/12/14
 #include <unistd.h>
 #include <iostream>
 #include <stdio.h>
@@ -151,4 +148,3 @@ int main(int argc, char * argv[]) {
     }
     return 0;
 }
-
