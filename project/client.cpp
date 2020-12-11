@@ -91,16 +91,17 @@ unsigned short make_frame(mac_addr *dst, mac_addr *src, unsigned short protocol,
 }
 
 // Send a frame
-void send_frame(unsigned char *frame_data, unsigned short len, int server_sock,char * address)
+void send_frame(unsigned char *frame_data, unsigned short len, int server_sock, char *address)
 {
-    printf("send_frame-len: %d\n",len);
+    printf("send_frame-len: %d\n", len);
     Message send_message;
-    for(int kk=0;kk<(len+6);kk++){
-        printf("%c",frame_data[kk]);
+    for (int kk = 0; kk < (len + 6); kk++)
+    {
+        printf("%c", frame_data[kk]);
     }
     printf("\n");
 
-   send_message.setMessageWithLen((char *)frame_data,(unsigned int)len,(char *)address,(unsigned int)(strlen(address)));
+    send_message.setMessageWithLen((char *)frame_data, (unsigned int)len, (char *)address, (unsigned int)(strlen(address)));
     
     ssize_t send_len = send(server_sock, (char *)&send_message, sizeof(Message), 0);
     if (send_len <= 0)
@@ -114,12 +115,12 @@ void send_frame(unsigned char *frame_data, unsigned short len, int server_sock,c
 }
 
 // Start send
-void datalink_layer_send(unsigned char *buf, int len, int server_sock,char * address)
+void datalink_layer_send(unsigned char *buf, int len, int server_sock, char *address)
 {
     unsigned char FrameBuffer[DATALINK_DATA_MAXSIZE + 18];
     unsigned short FrameLength = make_frame(&DesMacAddr, &SrcMacAddr, 0x0800, buf, len, FrameBuffer);
     printf("FrameLength: %d\n", FrameLength);
-    send_frame(FrameBuffer, FrameLength, server_sock,address);
+    send_frame(FrameBuffer, FrameLength, server_sock, address);
 }
 ///////////////////////数据链路层-发送-END////////////////////////////////
 
@@ -286,7 +287,7 @@ unsigned int MakeIpPacket(unsigned int DF, unsigned int MF, unsigned int Fragmen
 //datalink_layer_send(buf, IpPacketLen,fileOut);
 //将形成的UDP数据包发送给网络层处理
 // network_layer_send(udp_buffer,UdpPacketLen,fileOut);
-void network_layer_send(unsigned char *udp_packet, unsigned int udp_packet_len, int server_sock,char * address)
+void network_layer_send(unsigned char *udp_packet, unsigned int udp_packet_len, int server_sock, char *address)
 {
     printf("udp_packet_len: %d\n", udp_packet_len);
     struct IP_Packet ip_packet_info = {0b0100, 0b1111, 0b00000000,         //IPv4_Version,IPv4_IHL,IPv4_TOS
@@ -329,7 +330,7 @@ void network_layer_send(unsigned char *udp_packet, unsigned int udp_packet_len, 
             FragmentOffset = j;
             //unsigned int MakeIpPacket(unsigned int DF,unsigned int MF,unsigned int FragmentOffset, const IP_Packet ip_packet, unsigned char *buf, unsigned char *IPv4_Option, long IPv4_Option_Len, unsigned char *IPv4_Data, short IPv4_Data_Len)
             unsigned int IpPacketLen = MakeIpPacket(DF, MF, FragmentOffset, ip_packet_info, ipv4_buffer, ip_packet_info.IPv4_Option, 40, udp_packet_splited, 1440);
-            datalink_layer_send(ipv4_buffer, IpPacketLen, server_sock,address);
+            datalink_layer_send(ipv4_buffer, IpPacketLen, server_sock, address);
         }
         else
         {
@@ -456,7 +457,7 @@ int main(int argc, char *argv[])
         printf("please input your user_name: ");
         scanf("%s", client.name);
     }
-   // Message send_message;
+    // Message send_message;
     int server_sock = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -557,11 +558,8 @@ int main(int argc, char *argv[])
             if (FD_ISSET(STDIN_FILENO, &server_fd))
             {
                 ssize_t recv_len = read(STDIN_FILENO, recv_buff, MAX_DATA_SIZE);
-                printf("thread-recv_len: %d\n",(int)recv_len);
-                // recv_buff[recv_len-4]='3';
-                // recv_buff[recv_len-3]='2';
-                // recv_buff[recv_len-2]='1';
-                // printf("recv_buff[recv_len-1]%c\n",recv_buff[recv_len-1]);
+                printf("main-recv_len: %d\n", (int)recv_len);
+
                 if (recv_len <= 0)
                 {
                     perror("read failed");
@@ -585,14 +583,14 @@ int main(int argc, char *argv[])
                 }
                 lens = strlen(address);
                 address[lens - 1] = '\0';
-                printf("thread-message: %s\n", message);
-                printf("thread-address: %s\n", address);
+                printf("main-message: %s\n", message);
+                printf("main-address: %s\n", address);
 
                 //存放udp数据包
                 unsigned char UDP_Buffer[UDP_DATA_MAXSIZE + 8];
-                unsigned int UdpPacketLen = MakeUdpPacket(udp_packet_info, UDP_Buffer, (unsigned int)strlen(message), ( unsigned char *)message);
+                unsigned int UdpPacketLen = MakeUdpPacket(udp_packet_info, UDP_Buffer, (unsigned int)strlen(message), (unsigned char *)message);
                 //将形成的UDP数据包发送给网络层处理
-                network_layer_send(UDP_Buffer, UdpPacketLen, server_sock,address);
+                network_layer_send(UDP_Buffer, UdpPacketLen, server_sock, address);
 
                 memset(recv_buff, 0, sizeof(recv_buff));
             }
